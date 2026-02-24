@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-education",
+      "description": "A modern university library or collaborative workspace",
+      "imageUrl": "https://picsum.photos/seed/mentorsync1/1200/800",
+      "imageHint": "university education"
+    },
+    {
+      "id": "avatar-student-1",
+      "description": "Student avatar",
+      "imageUrl": "https://picsum.photos/seed/student1/200/200",
+      "imageHint": "student person"
+    },
+    {
+      "id": "avatar-teacher-1",
+      "description": "Teacher avatar",
+      "imageUrl": "https://picsum.photos/seed/teacher1/200/200",
+      "imageHint": "teacher professional"
+    }
+  ]
+}
