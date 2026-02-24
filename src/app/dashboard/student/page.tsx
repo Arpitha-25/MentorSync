@@ -6,22 +6,48 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogTrigger 
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { MOCK_TEACHERS, MOCK_STUDENTS } from "@/lib/mock-data";
 import { UserProfile } from "@/lib/types";
 import { RequestModal } from "@/components/dashboard/RequestModal";
 import { toast } from "@/hooks/use-toast";
-import { Brain, Sparkles, LogOut } from "lucide-react";
+import { Brain, Sparkles, LogOut, BookOpen, History, Settings2, Check } from "lucide-react";
 import Link from 'next/link';
 
+const AVAILABLE_INTERESTS = [
+  "Machine Learning", "Data Science", "Mathematics", "Statistics", 
+  "Software Engineering", "Artificial Intelligence", "Blockchain", 
+  "UI/UX Design", "Product Management", "Cybersecurity"
+];
+
+const MOCK_PAST_SESSIONS = [
+  { id: 'ps1', date: '2024-03-15', mentor: 'Dr. Sarah Mitchell', topic: 'Neural Networks Basics' },
+  { id: 'ps2', date: '2024-03-10', mentor: 'Prof. Robert Chen', topic: 'Statistical Distributions' },
+  { id: 'ps3', date: '2024-03-05', mentor: 'Dr. Sarah Mitchell', topic: 'Linear Regression Review' },
+];
+
+const MOCK_RESOURCES = [
+  { id: 'r1', title: 'Introduction to PyTorch', type: 'PDF', size: '2.4 MB' },
+  { id: 'r2', title: 'Advanced Gradient Descent', type: 'Video', duration: '15 min' },
+  { id: 'r3', title: 'Matrix Algebra for ML', type: 'Course', duration: '4 hours' },
+];
+
 export default function StudentDashboard() {
+  const [student, setStudent] = useState(MOCK_STUDENTS[0]);
   const [allocatedMentor, setAllocatedMentor] = useState<UserProfile | null>(null);
-  const student = MOCK_STUDENTS[0];
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(student.interests);
 
   useEffect(() => {
     // Simple rule-based allocation:
-    // 1. Match by first interest
-    // 2. Check if teacher is active
-    // 3. Check if teacher has capacity
     const mentor = MOCK_TEACHERS.find(t => 
       t.isActive && 
       t.interests.some(interest => student.interests.includes(interest)) &&
@@ -30,11 +56,12 @@ export default function StudentDashboard() {
     
     if (mentor) {
       setAllocatedMentor(mentor);
+    } else {
+      setAllocatedMentor(null);
     }
   }, [student]);
 
   const handleRequestSubmit = (data: any) => {
-    // Spam detection logic (simple)
     const spamKeywords = ["buy", "spam", "click here", "urgent!!!"];
     const isSpam = spamKeywords.some(kw => data.content.toLowerCase().includes(kw));
 
@@ -50,6 +77,22 @@ export default function StudentDashboard() {
         description: `Your request has been sent to ${allocatedMentor?.name}.`,
       });
     }
+  };
+
+  const handleUpdateInterests = () => {
+    setStudent(prev => ({ ...prev, interests: selectedInterests }));
+    toast({
+      title: "Interests Updated",
+      description: "Your mentor matches will be re-evaluated.",
+    });
+  };
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(i => i !== interest) 
+        : [...prev, interest]
+    );
   };
 
   return (
@@ -137,15 +180,94 @@ export default function StudentDashboard() {
               <CardTitle className="font-headline text-sm text-primary uppercase tracking-wider">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start border-muted hover:bg-muted/50">
-                Update Interests
-              </Button>
-              <Button variant="outline" className="w-full justify-start border-muted hover:bg-muted/50">
-                Past Sessions
-              </Button>
-              <Button variant="outline" className="w-full justify-start border-muted hover:bg-muted/50">
-                Learning Resources
-              </Button>
+              {/* Update Interests Action */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start border-muted hover:bg-muted/50">
+                    <Settings2 className="mr-2 h-4 w-4 text-accent" /> Update Interests
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Update Your Interests</DialogTitle>
+                    <DialogDescription>Select the topics you are currently focusing on to improve mentor matching.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4 py-4">
+                    {AVAILABLE_INTERESTS.map((interest) => (
+                      <div key={interest} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={interest} 
+                          checked={selectedInterests.includes(interest)}
+                          onCheckedChange={() => toggleInterest(interest)}
+                        />
+                        <Label htmlFor={interest} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          {interest}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  <Button onClick={handleUpdateInterests} className="w-full bg-primary">Save Changes</Button>
+                </DialogContent>
+              </Dialog>
+
+              {/* Past Sessions Action */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start border-muted hover:bg-muted/50">
+                    <History className="mr-2 h-4 w-4 text-accent" /> Past Sessions
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Session History</DialogTitle>
+                    <DialogDescription>A record of your previous interactions and consultations.</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    {MOCK_PAST_SESSIONS.map(session => (
+                      <div key={session.id} className="flex items-start justify-between p-3 border rounded-lg bg-muted/20">
+                        <div>
+                          <p className="font-bold text-primary">{session.topic}</p>
+                          <p className="text-xs text-muted-foreground">{session.mentor}</p>
+                        </div>
+                        <p className="text-xs font-medium text-muted-foreground">{session.date}</p>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Learning Resources Action */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start border-muted hover:bg-muted/50">
+                    <BookOpen className="mr-2 h-4 w-4 text-accent" /> Learning Resources
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Learning Resources</DialogTitle>
+                    <DialogDescription>Recommended materials shared by your mentors.</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 py-4">
+                    {MOCK_RESOURCES.map(res => (
+                      <div key={res.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/5 transition-colors cursor-pointer group">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/5 rounded-lg group-hover:bg-primary/10">
+                            <BookOpen className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold">{res.title}</p>
+                            <p className="text-xs text-muted-foreground">{res.type} {res.size || res.duration}</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                          <Check className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
           
