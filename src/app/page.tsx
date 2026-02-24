@@ -34,7 +34,7 @@ export default function Home() {
             <Link href="#about" className="hover:text-primary transition-colors">About</Link>
           </div>
           <div className="flex gap-4">
-             <Link href="/dashboard/student">
+             <Link href="/login">
               <Button variant="ghost" size="sm">Login</Button>
             </Link>
           </div>
@@ -59,13 +59,13 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link href="/dashboard/student" className="flex-1">
+              <Link href="/login?role=student" className="flex-1">
                 <Button className="w-full h-16 text-lg bg-primary hover:bg-primary/90 font-headline group">
                   Student Login
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/dashboard/teacher" className="flex-1">
+              <Link href="/login?role=teacher" className="flex-1">
                 <Button variant="outline" className="w-full h-16 text-lg border-primary text-primary hover:bg-primary/5 font-headline">
                   Faculty Portal
                 </Button>
